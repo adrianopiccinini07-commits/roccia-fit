@@ -250,16 +250,18 @@ func main() {
 		})
 	})
 
-	//qui caricheremo le variabili d'ambiente
+	// qui caricheremo le variabili d'ambiente
 	port := os.Getenv("PORT")
 	if port == "" {
 		port = ":8080"
+	} else if port[0] != ':' {
+		port = ":" + port // Se Render ci passa "10000", noi lo trasformiamo in ":10000"
 	}
 
 	fmt.Printf("Server in ascolto sulla porta %s...\n", port)
 
-	// accendiamo il server e vediamo se produce un errore(siamo in TCP)
+	// accendiamo il server
 	if err := http.ListenAndServe(port, r); err != nil {
-		log.Fatalf("Errore durante l'avvio del server: %v", err) // stampa l'errore e poi chiama os.Exit(1) chiude il programma
+		log.Fatalf("Errore durante l'avvio del server: %v", err)
 	}
 }
