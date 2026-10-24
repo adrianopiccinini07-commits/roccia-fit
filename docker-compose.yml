@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: roccia_fit_db
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-segreto_locale_123}
+      POSTGRES_DB: roccia_fit
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  api:
+    build: .
+    container_name: roccia_fit_api
+    restart: always
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=:8080
+      - DB_DSN=postgres://admin:${DB_PASSWORD:-segreto_locale_123}@db:5432/roccia_fit?sslmode=disable
+      - JWT_SECRET=${JWT_SECRET:-chiave_sviluppo_locale}
+    depends_on:
+      - db
+
+volumes:
+  pgdata:

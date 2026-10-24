@@ -1,0 +1,1198 @@
+basePath: /api/v1
+definitions:
+  controllers.CambioPswReq:
+    properties:
+      email:
+        type: string
+      nuova_psw:
+        type: string
+      vecchia_psw:
+        type: string
+    type: object
+  controllers.Credenziali:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    type: object
+  models.Allenamento:
+    properties:
+      data:
+        type: string
+      durata:
+        format: float64
+        type: number
+      id:
+        type: string
+      idatleta:
+        description: chiave esterna verso Utente
+        type: string
+      note:
+        type: string
+      serieEseguite:
+        items:
+          $ref: '#/definitions/models.SerieEseguita'
+        type: array
+    type: object
+  models.CheckFoto:
+    properties:
+      data:
+        type: string
+      id:
+        type: string
+      idatleta:
+        type: string
+      urlFoto:
+        type: string
+    type: object
+  models.Esercizio:
+    properties:
+      descrizione:
+        type: string
+      gruppoMuscolare:
+        type: string
+      id:
+        type: string
+      nome:
+        type: string
+      video:
+        type: string
+    type: object
+  models.EsercizioScheda:
+    properties:
+      esercizio:
+        $ref: '#/definitions/models.Esercizio'
+      id:
+        type: string
+      idesercizio:
+        description: chiave esterna verso Esercizio (catalogo)
+        type: string
+      idgiorno:
+        description: chiave esterna verso GiornoAllenamento
+        type: string
+      ordine:
+        type: integer
+      recupero:
+        type: integer
+      reps:
+        type: integer
+      rir:
+        type: integer
+      serie:
+        type: integer
+    type: object
+  models.GiornoAllenamento:
+    properties:
+      esercizi:
+        items:
+          $ref: '#/definitions/models.EsercizioScheda'
+        type: array
+      giorno:
+        type: string
+      id:
+        type: string
+      idscheda:
+        type: string
+    type: object
+  models.PesoCorporeo:
+    properties:
+      data:
+        type: string
+      fame:
+        type: integer
+      id:
+        type: string
+      idatleta:
+        description: chiave verso utente
+        type: string
+      peso:
+        format: float64
+        type: number
+      sonno:
+        type: integer
+    type: object
+  models.SchedaAllenamento:
+    properties:
+      dataFine:
+        type: string
+      dataInizio:
+        type: string
+      giorni:
+        description: Relazione 1 a N
+        items:
+          $ref: '#/definitions/models.GiornoAllenamento'
+        type: array
+      id:
+        type: string
+      idatleta:
+        type: string
+      idcoach:
+        type: string
+      nome:
+        type: string
+    type: object
+  models.SerieEseguita:
+    properties:
+      id:
+        type: string
+      idallenamento:
+        description: chiave verso Allenamento
+        type: string
+      idesercizioScheda:
+        description: chiave verso EsercizioScheda
+        type: string
+      peso:
+        format: float64
+        type: number
+      reps:
+        type: integer
+      rir:
+        type: integer
+    type: object
+  models.Utente:
+    properties:
+      allenamenti:
+        items:
+          $ref: '#/definitions/models.Allenamento'
+        type: array
+      atletiSeguiti:
+        items:
+          $ref: '#/definitions/models.Utente'
+        type: array
+      cf:
+        type: string
+      checkFoto:
+        items:
+          $ref: '#/definitions/models.CheckFoto'
+        type: array
+      cognome:
+        type: string
+      email:
+        description: l'email non puo essere vuota
+        type: string
+      id:
+        type: string
+      nome:
+        type: string
+      password:
+        type: string
+      pesiCorporeo:
+        items:
+          $ref: '#/definitions/models.PesoCorporeo'
+        type: array
+      ruolo:
+        description: '"COACH" , "ATLETA" o "CLIENTE"'
+        type: string
+      schedaCreate:
+        items:
+          $ref: '#/definitions/models.SchedaAllenamento'
+        type: array
+      schedaRicevute:
+        items:
+          $ref: '#/definitions/models.SchedaAllenamento'
+        type: array
+      telefono:
+        type: string
+    type: object
+host: localhost
+info:
+  contact: {}
+  description: API per gestione la gestione dei parametri d'allenamento e condizione
+    fisica
+  termsOfService: http://swagger.io/terms/
+  title: RocciaFit API
+  version: "1.0"
+paths:
+  /allenamenti/{id}:
+    delete:
+      description: Rimuove un allenamento e le serie associate
+      parameters:
+      - description: ID Allenamento
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Allenamento eliminato
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Elimina allenamento
+      tags:
+      - Allenamenti
+    get:
+      description: Recupera un allenamento specifico con tutte le sue serie
+      parameters:
+      - description: ID Allenamento
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Allenamento'
+      security:
+      - BearerAuth: []
+      summary: Dettagli allenamento
+      tags:
+      - Allenamenti
+  /allenamenti/atleta/{idAtleta}:
+    get:
+      description: Recupera gli allenamenti in formato paginato
+      parameters:
+      - description: ID Atleta
+        in: path
+        name: idAtleta
+        required: true
+        type: string
+      - description: 'Numero pagina (default: 1)'
+        in: query
+        name: page
+        type: integer
+      - description: 'Elementi per pagina (default: 10)'
+        in: query
+        name: limit
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Storico allenamenti
+      tags:
+      - Allenamenti
+  /allenamenti/inizia:
+    post:
+      consumes:
+      - application/json
+      description: Crea una nuova sessione vuota
+      parameters:
+      - description: Dati allenamento
+        in: body
+        name: allenamento
+        required: true
+        schema:
+          $ref: '#/definitions/models.Allenamento'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Allenamento'
+      security:
+      - BearerAuth: []
+      summary: Inizia un nuovo allenamento
+      tags:
+      - Allenamenti
+  /allenamenti/serie:
+    post:
+      consumes:
+      - application/json
+      description: Aggiunge una serie eseguita al database
+      parameters:
+      - description: Dati serie
+        in: body
+        name: serie
+        required: true
+        schema:
+          $ref: '#/definitions/models.SerieEseguita'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.SerieEseguita'
+      security:
+      - BearerAuth: []
+      summary: Registra una serie
+      tags:
+      - Allenamenti
+  /allenamenti/serie/{id}:
+    delete:
+      description: Rimuove una singola serie
+      parameters:
+      - description: ID Serie
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Serie eliminata
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Elimina serie
+      tags:
+      - Allenamenti
+    put:
+      consumes:
+      - application/json
+      description: Modifica i kg o le ripetizioni di una serie esistente
+      parameters:
+      - description: ID Serie
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dati da aggiornare
+        in: body
+        name: serie
+        required: true
+        schema:
+          $ref: '#/definitions/models.SerieEseguita'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SerieEseguita'
+      security:
+      - BearerAuth: []
+      summary: Aggiorna serie
+      tags:
+      - Allenamenti
+  /auth/login:
+    post:
+      consumes:
+      - application/json
+      description: Verifica email e password e restituisce un token JWT
+      parameters:
+      - description: Dati di accesso
+        in: body
+        name: credenziali
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.Credenziali'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Richiesta non valida
+          schema:
+            type: string
+        "401":
+          description: Credenziali errate
+          schema:
+            type: string
+      summary: Autenticazione utente
+      tags:
+      - Autenticazione
+  /auth/password:
+    put:
+      consumes:
+      - application/json
+      description: Aggiorna la password verificando la precedente
+      parameters:
+      - description: Dati cambio password
+        in: body
+        name: credenziali
+        required: true
+        schema:
+          $ref: '#/definitions/controllers.CambioPswReq'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Password aggiornata con successo
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Modifica password
+      tags:
+      - Autenticazione
+  /check:
+    post:
+      consumes:
+      - application/json
+      description: Registra nel database il link della foto caricata e la data
+      parameters:
+      - description: Dati check
+        in: body
+        name: check
+        required: true
+        schema:
+          $ref: '#/definitions/models.CheckFoto'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.CheckFoto'
+      security:
+      - BearerAuth: []
+      summary: Salva dati check
+      tags:
+      - Check Fotografici
+  /check/{id}:
+    delete:
+      description: Rimuove logicamente (Soft Delete) una foto di check
+      parameters:
+      - description: ID Check
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Foto eliminata
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Elimina check
+      tags:
+      - Check Fotografici
+    get:
+      description: Recupera i dettagli di una singola foto
+      parameters:
+      - description: ID Check
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CheckFoto'
+      security:
+      - BearerAuth: []
+      summary: Singolo check
+      tags:
+      - Check Fotografici
+    put:
+      consumes:
+      - application/json
+      description: Modifica i dati di un check fotografico esistente
+      parameters:
+      - description: ID Check
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dati da aggiornare
+        in: body
+        name: check
+        required: true
+        schema:
+          $ref: '#/definitions/models.CheckFoto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.CheckFoto'
+      security:
+      - BearerAuth: []
+      summary: Aggiorna check
+      tags:
+      - Check Fotografici
+  /check/atleta/{idAtleta}:
+    get:
+      description: Recupera la galleria storica dei check di un atleta
+      parameters:
+      - description: ID Atleta
+        in: path
+        name: idAtleta
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.CheckFoto'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Storico check
+      tags:
+      - Check Fotografici
+  /check/upload:
+    post:
+      consumes:
+      - multipart/form-data
+      description: Salva il file fisico della foto di check (Max 10MB)
+      parameters:
+      - description: File immagine
+        in: formData
+        name: foto
+        required: true
+        type: file
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Carica foto condizione
+      tags:
+      - Check Fotografici
+  /esercizi:
+    get:
+      description: Recupera la lista completa degli esercizi disponibili
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Esercizio'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Catalogo esercizi
+      tags:
+      - Esercizi
+    post:
+      consumes:
+      - application/json
+      description: Aggiunge un nuovo esercizio al catalogo globale
+      parameters:
+      - description: Dati esercizio
+        in: body
+        name: esercizio
+        required: true
+        schema:
+          $ref: '#/definitions/models.Esercizio'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Esercizio'
+      security:
+      - BearerAuth: []
+      summary: Crea esercizio
+      tags:
+      - Esercizi
+  /esercizi/{id}:
+    delete:
+      description: Rimuove logicamente (Soft Delete) un esercizio dal catalogo
+      parameters:
+      - description: ID Esercizio
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Esercizio eliminato
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Elimina esercizio
+      tags:
+      - Esercizi
+    get:
+      description: Recupera i dettagli di uno specifico esercizio tramite ID
+      parameters:
+      - description: ID Esercizio
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Esercizio'
+      security:
+      - BearerAuth: []
+      summary: Singolo esercizio
+      tags:
+      - Esercizi
+    put:
+      consumes:
+      - application/json
+      description: Modifica i dati (es. nome o gruppo muscolare) di un esercizio
+      parameters:
+      - description: ID Esercizio
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dati da aggiornare
+        in: body
+        name: esercizio
+        required: true
+        schema:
+          $ref: '#/definitions/models.Esercizio'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Esercizio'
+      security:
+      - BearerAuth: []
+      summary: Aggiorna esercizio
+      tags:
+      - Esercizi
+  /esercizi/bulk:
+    post:
+      consumes:
+      - application/json
+      description: Inserisce un array di esercizi in un colpo solo
+      parameters:
+      - description: Array di esercizi
+        in: body
+        name: esercizi
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/models.Esercizio'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            items:
+              $ref: '#/definitions/models.Esercizio'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Creazione massiva esercizi
+      tags:
+      - Esercizi
+  /peso:
+    post:
+      consumes:
+      - application/json
+      description: Salva il peso corporeo giornaliero
+      parameters:
+      - description: Dati pesata
+        in: body
+        name: peso
+        required: true
+        schema:
+          $ref: '#/definitions/models.PesoCorporeo'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.PesoCorporeo'
+      security:
+      - BearerAuth: []
+      summary: Registra pesata
+      tags:
+      - Peso
+  /peso/{id}:
+    delete:
+      description: Rimuove una singola pesata dal database
+      parameters:
+      - description: ID Pesata
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Pesata eliminata
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Elimina pesata
+      tags:
+      - Peso
+    get:
+      description: Recupera una pesata specifica tramite ID
+      parameters:
+      - description: ID Pesata
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PesoCorporeo'
+      security:
+      - BearerAuth: []
+      summary: Singola pesata
+      tags:
+      - Peso
+    put:
+      consumes:
+      - application/json
+      description: Modifica i kg o la data di una pesata esistente
+      parameters:
+      - description: ID Pesata
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dati aggiornati
+        in: body
+        name: peso
+        required: true
+        schema:
+          $ref: '#/definitions/models.PesoCorporeo'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PesoCorporeo'
+      security:
+      - BearerAuth: []
+      summary: Aggiorna pesata
+      tags:
+      - Peso
+  /peso/atleta/{idAtleta}:
+    get:
+      description: Recupera tutte le pesate di un atleta in ordine cronologico
+      parameters:
+      - description: ID Atleta
+        in: path
+        name: idAtleta
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.PesoCorporeo'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Storico peso
+      tags:
+      - Peso
+  /peso/bulk:
+    post:
+      consumes:
+      - application/json
+      description: Carica un array di pesate storiche in un colpo solo
+      parameters:
+      - description: Array di pesate
+        in: body
+        name: pesate
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/models.PesoCorporeo'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            items:
+              $ref: '#/definitions/models.PesoCorporeo'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Inserimento massivo pesi
+      tags:
+      - Peso
+  /peso/ultimo/{idAtleta}:
+    get:
+      description: Recupera solo la pesata più recente
+      parameters:
+      - description: ID Atleta
+        in: path
+        name: idAtleta
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PesoCorporeo'
+      security:
+      - BearerAuth: []
+      summary: Ultimo peso
+      tags:
+      - Peso
+  /schede:
+    post:
+      consumes:
+      - application/json
+      description: Genera una nuova scheda con giorni ed esercizi nidificati
+      parameters:
+      - description: Dati scheda
+        in: body
+        name: scheda
+        required: true
+        schema:
+          $ref: '#/definitions/models.SchedaAllenamento'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.SchedaAllenamento'
+      security:
+      - BearerAuth: []
+      summary: Crea scheda di allenamento
+      tags:
+      - Schede
+  /schede/{id}:
+    delete:
+      description: Rimuove una scheda e applica la cancellazione a cascata
+      parameters:
+      - description: ID Scheda
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Scheda eliminata
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Elimina scheda
+      tags:
+      - Schede
+    get:
+      description: Recupera una specifica scheda tramite ID
+      parameters:
+      - description: ID Scheda
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SchedaAllenamento'
+      security:
+      - BearerAuth: []
+      summary: Dettaglio scheda
+      tags:
+      - Schede
+    put:
+      consumes:
+      - application/json
+      description: Sostituisce i dati di una scheda e delle sue relazioni nidificate
+      parameters:
+      - description: ID Scheda
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dati aggiornati
+        in: body
+        name: scheda
+        required: true
+        schema:
+          $ref: '#/definitions/models.SchedaAllenamento'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.SchedaAllenamento'
+      security:
+      - BearerAuth: []
+      summary: Aggiorna scheda
+      tags:
+      - Schede
+  /schede/atleta/{idAtleta}:
+    get:
+      description: Recupera tutte le schede di un atleta con i relativi esercizi
+      parameters:
+      - description: ID Atleta
+        in: path
+        name: idAtleta
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.SchedaAllenamento'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Elenco schede
+      tags:
+      - Schede
+  /stats/massimale/{idSerie}:
+    get:
+      description: Calcola l'1RM teorico di una serie tramite l'equazione di Brzycki
+      parameters:
+      - description: ID Serie
+        in: path
+        name: idSerie
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Stima Massimale
+      tags:
+      - Statistiche
+  /stats/tonnellaggio/{idAllenamento}:
+    get:
+      description: Calcola il volume totale sollevato (Kg * Reps) in una sessione
+      parameters:
+      - description: ID Allenamento
+        in: path
+        name: idAllenamento
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Calcolo tonnellaggio
+      tags:
+      - Statistiche
+  /stats/volume/{idAtleta}:
+    get:
+      description: Calcola il totale delle serie allenanti per gruppo muscolare degli
+        ultimi 7 giorni
+      parameters:
+      - description: ID Atleta
+        in: path
+        name: idAtleta
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            additionalProperties: true
+            type: object
+      security:
+      - BearerAuth: []
+      summary: Analisi volume settimanale
+      tags:
+      - Statistiche
+  /utenti:
+    get:
+      description: Recupera la lista di tutti gli utenti registrati
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/models.Utente'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Elenco utenti
+      tags:
+      - Utenti
+    post:
+      consumes:
+      - application/json
+      description: Inserisce un nuovo utente manualmente nel database
+      parameters:
+      - description: Dati utente
+        in: body
+        name: utente
+        required: true
+        schema:
+          $ref: '#/definitions/models.Utente'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Utente'
+      security:
+      - BearerAuth: []
+      summary: Crea utente (Admin)
+      tags:
+      - Utenti
+  /utenti/{id}:
+    delete:
+      description: Rimuove un utente dal database
+      parameters:
+      - description: ID Utente
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Utente eliminato
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Elimina utente
+      tags:
+      - Utenti
+    get:
+      description: Recupera i dettagli di uno specifico utente tramite ID
+      parameters:
+      - description: ID Utente
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Utente'
+      security:
+      - BearerAuth: []
+      summary: Singolo utente
+      tags:
+      - Utenti
+    put:
+      consumes:
+      - application/json
+      description: Modifica i dati di un utente esistente
+      parameters:
+      - description: ID Utente
+        in: path
+        name: id
+        required: true
+        type: string
+      - description: Dati da aggiornare
+        in: body
+        name: utente
+        required: true
+        schema:
+          $ref: '#/definitions/models.Utente'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Utente'
+      security:
+      - BearerAuth: []
+      summary: Aggiorna utente
+      tags:
+      - Utenti
+  /utenti/bulk:
+    post:
+      consumes:
+      - application/json
+      description: Inserisce un array di utenti in un colpo solo
+      parameters:
+      - description: Array di utenti
+        in: body
+        name: utenti
+        required: true
+        schema:
+          items:
+            $ref: '#/definitions/models.Utente'
+          type: array
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            items:
+              $ref: '#/definitions/models.Utente'
+            type: array
+      security:
+      - BearerAuth: []
+      summary: Creazione massiva utenti
+      tags:
+      - Utenti
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorzation
+    type: apiKey
+swagger: "2.0"

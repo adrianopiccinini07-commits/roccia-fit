@@ -1,0 +1,12 @@
+# Variabili d'ambiente (SEGRETI)
+.env
+.env.local
+
+# Eseguibili compilati da Go
+roccia-api
+roccia-api.exe
+*.exe
+
+# Log e file di sistema
+*.log
+.DS_Store
