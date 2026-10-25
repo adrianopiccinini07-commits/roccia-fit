@@ -75,6 +75,7 @@ func main() {
 		&models.SessioneCardio{},
 		&models.Feedback{},
 		&models.CheckIn{},
+		&models.Messaggio{},
 	); err != nil {
 		log.Fatalf("Errore durante la migrazione: %v", err) // %v e' un segnaposto usato per stampare log
 	}
@@ -92,6 +93,7 @@ func main() {
 	cardioController := &controllers.CardioController{DB: db}
 	feedbackController := &controllers.FeedbackController{DB: db}
 	messaggioController := &controllers.MessaggioController{DB: db}
+	chatAIController := &controllers.ChatAIController{DB: db}
 
 	// Creiamo il ROUTER chi
 	r := chi.NewRouter()
@@ -239,6 +241,7 @@ func main() {
 			r.Route("/chat", func(r chi.Router) {
 				r.Post("/", messaggioController.InviaMessaggio)
 				r.Get("/{id1}/{id2}", messaggioController.GetCronologiaChat)
+				r.Post("/ai", chatAIController.GeneraRispostaAI)
 			})
 
 			// --- ROTTE CARDIO ---

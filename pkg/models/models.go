@@ -144,11 +144,11 @@ type Feedback struct {
 
 type Messaggio struct {
 	ID             string    `gorm:"primaryKey;type:varchar(36)" json:"id"`
-	IDMittente     string    `gorm:"type:varchar(36);not null;index" json:"id_mittente"`
-	IDDestinatario string    `gorm:"type:varchar(36);not null;index" json:"id_destinatario"`
-	Testo          string    `gorm:"type:text;not null" json:"testo"`
-	Letto          bool      `gorm:"default:false" json:"letto"`
-	DataInvio      time.Time `gorm:"autoCreateTime" json:"data_invio"`
+	IDMittente     string    `gorm:"column:id_mittente;type:varchar(36);not null;index" json:"id_mittente"`
+	IDDestinatario string    `gorm:"column:id_destinatario;type:varchar(36);not null;index" json:"id_destinatario"`
+	Testo          string    `gorm:"column:testo;type:text;not null" json:"testo"`
+	Letto          bool      `gorm:"column:letto;default:false" json:"letto"`
+	DataInvio      time.Time `gorm:"column:data_invio;autoCreateTime" json:"data_invio"`
 }
 
 func (m *Messaggio) BeforeCreate(tx *gorm.DB) (err error) {

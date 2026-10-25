@@ -46,14 +46,14 @@ func (c *MessaggioController) GetCronologiaChat(w http.ResponseWriter, r *http.R
 
 	var messaggi []models.Messaggio
 
-	// Cerchiamo i messaggi dove (Mittente=1 E Destinatario=2) OPPURE (Mittente=2 E Destinatario=1)
 	err := c.DB.Where(
 		"(id_mittente = ? AND id_destinatario = ?) OR (id_mittente = ? AND id_destinatario = ?)",
 		idUtente1, idUtente2, idUtente2, idUtente1,
 	).Order("data_invio asc").Find(&messaggi).Error
 
 	if err != nil {
-		http.Error(w, "Errore nel recupero della chat", http.StatusInternalServerError)
+		// Restituiamo l'errore esatto di GORM per facilitare il debug
+		http.Error(w, "Errore DB: "+err.Error(), http.StatusInternalServerError)
 		return
 	}
 
