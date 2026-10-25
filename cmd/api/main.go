@@ -131,10 +131,13 @@ func main() {
 	r.Get("/swagger/*", httpSwagger.WrapHandler)
 
 	r.Route("/api/v1", func(r chi.Router) {
+
 		r.Route("/auth", func(r chi.Router) {
 			r.Post("/registrati", authController.RegistrazioneSicura)
 			r.Post("/login", authController.Login)
 		})
+
+		r.Get("/ws/{id}", messaggioController.ConnettiWS)
 
 		r.Group(func(r chi.Router) {
 			//applica il middleware a tutto quello che si trova nel middleware
@@ -241,7 +244,6 @@ func main() {
 			r.Route("/chat", func(r chi.Router) {
 				r.Post("/", messaggioController.InviaMessaggio)
 				r.Get("/{id1}/{id2}", messaggioController.GetCronologiaChat)
-				r.Get("/ws/{id}", messaggioController.ConnettiWS)
 				r.Post("/ai", chatAIController.GeneraRispostaAI)
 			})
 
