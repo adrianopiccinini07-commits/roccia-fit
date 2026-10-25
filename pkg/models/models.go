@@ -146,7 +146,8 @@ type Messaggio struct {
 	ID             string    `gorm:"primaryKey;type:varchar(36)" json:"id"`
 	IDMittente     string    `gorm:"column:id_mittente;type:varchar(36);not null;index" json:"id_mittente"`
 	IDDestinatario string    `gorm:"column:id_destinatario;type:varchar(36);not null;index" json:"id_destinatario"`
-	Testo          string    `gorm:"column:testo;type:text;not null" json:"testo"`
+	Testo          string    `gorm:"column:testo;type:text" json:"testo"`
+	UrlFoto        string    `gorm:"column:url_foto;type:text" json:"url_foto"`
 	Letto          bool      `gorm:"column:letto;default:false" json:"letto"`
 	DataInvio      time.Time `gorm:"column:data_invio;autoCreateTime" json:"data_invio"`
 }

@@ -241,6 +241,7 @@ func main() {
 			r.Route("/chat", func(r chi.Router) {
 				r.Post("/", messaggioController.InviaMessaggio)
 				r.Get("/{id1}/{id2}", messaggioController.GetCronologiaChat)
+				r.Get("/ws/{id}", messaggioController.ConnettiWS)
 				r.Post("/ai", chatAIController.GeneraRispostaAI)
 			})
 
