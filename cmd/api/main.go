@@ -137,7 +137,7 @@ func main() {
 			r.Post("/login", authController.Login)
 		})
 
-		r.Get("/ws/{id}", messaggioController.ConnettiWS)
+		r.Get("/chat/ws/{id}", messaggioController.ConnettiWS)
 
 		r.Group(func(r chi.Router) {
 			//applica il middleware a tutto quello che si trova nel middleware

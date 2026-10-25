@@ -1,7 +1,5 @@
 package database
 
-//File che rappresenta il motore per comunicare con il db
-
 import (
 	"log"
 
@@ -12,8 +10,10 @@ import (
 // InitDB inizializza e restituisce la connessione PostgreSQL usando GORM
 func InitDB(dsn string) *gorm.DB {
 
-	// Aprimao la connessione con GORM
-	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	// 👇 AGGIUNTO: PrepareStmt: false disabilita la cache delle query problematica su Neon DB
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
+		PrepareStmt: false,
+	})
 
 	if err != nil {
 		log.Fatalf("Impossibile connettersi al database: %v", err)
